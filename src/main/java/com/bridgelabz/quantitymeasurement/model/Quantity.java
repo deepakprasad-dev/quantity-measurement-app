@@ -28,8 +28,9 @@ public class Quantity {
 
     /**
      * Factory Method to create a new Quantity.
+     *
      * @param value the numeric magnitude.
-     * @param unit the unit of measurement.
+     * @param unit  the unit of measurement.
      * @return a new Quantity instance.
      */
     public static Quantity of(double value, Unit unit) {
@@ -41,26 +42,55 @@ public class Quantity {
      * @param other the other Quantity to add.
      * @return a new Quantity representing the sum in INCH.
      */
-    public Quantity add(Quantity other) {
-        if (other == null) {
-            throw new IllegalArgumentException("Cannot add a null quantity");
-        }
 
-        double sumInBaseUnit = this.unit.convertToBaseUnit(this.value) +
-                other.unit.convertToBaseUnit(other.value);
-
-        return Quantity.of(sumInBaseUnit, Unit.INCH);
-    }
 
     /**
      * Overloaded Add Method: Allows adding a raw value and unit directly.
+     *
      * @param value the numeric value to add.
-     * @param unit the unit of the value to add.
+     * @param unit  the unit of the value to add.
      * @return a new Quantity representing the sum in INCH.
      */
     public Quantity add(double value, Unit unit) {
         // Reuses the main add method to strictly enforce the DRY principle
         return this.add(Quantity.of(value, unit));
+    }
+
+    /**
+     * UC7: Adds another Quantity and returns the result in the specified Target Unit.
+     *
+     * @param other      the other Quantity to add.
+     * @param targetUnit the unit the resulting Quantity should be in.
+     * @return a new Quantity representing the sum in the target unit.
+     */
+    public Quantity add(Quantity other, Unit targetUnit) {
+        if (targetUnit == null) {
+            throw new IllegalArgumentException("Target unit cannot be null");
+        }
+
+        double sumInBaseUnit = calculateSumInBaseUnit(other);
+
+        double targetValue = targetUnit.convertFromBaseUnit(sumInBaseUnit);
+
+        return Quantity.of(targetValue, targetUnit);
+    }
+
+    /**
+     * Backwards compatible add method: Defaults to INCH if no target unit is specified.
+     */
+    public Quantity add(Quantity other) {
+        return this.add(other, Unit.INCH);
+    }
+
+    /**
+     * Private utility method to enforce DRY principle for arithmetic.
+     */
+    private double calculateSumInBaseUnit(Quantity other) {
+        if (other == null) {
+            throw new IllegalArgumentException("Cannot add a null quantity");
+        }
+        return this.unit.convertToBaseUnit(this.value) +
+                other.unit.convertToBaseUnit(other.value);
     }
 
     @Override

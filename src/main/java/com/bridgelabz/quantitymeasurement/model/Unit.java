@@ -29,4 +29,14 @@ public enum Unit {
     public double convertToBaseUnit(double value) {
         return value * this.baseConversionFactor;
     }
+
+    /**
+     * Converts a base unit value back into this specific unit.
+     * @param baseValue the numeric value in the base unit (INCH).
+     * @return the converted value in this unit.
+     */
+    public double convertFromBaseUnit(double baseValue) {
+        return baseValue / this.baseConversionFactor;
+    }
+
 }
