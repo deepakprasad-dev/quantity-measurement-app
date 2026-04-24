@@ -6,7 +6,12 @@ public class Quantity {
     private final double value;
     private final Unit unit;
 
+    private static final double EPSILON = 0.001;
+
     public Quantity(double value, Unit unit){
+        if(value<0){
+            throw new IllegalArgumentException("Quantity value cannot be negative");
+        }
         this.value = value;
         this.unit = unit;
     }
@@ -30,9 +35,11 @@ public class Quantity {
         if (obj == null || getClass() != obj.getClass()) return false;
         Quantity quantity = (Quantity) obj;
 
-        // Normalize both to the base unit (inches) for comparison
-        return Double.compare(this.value * this.unit.getBaseConversionFactor(),
-                quantity.value * quantity.unit.getBaseConversionFactor()) == 0;
+        double thisBaseValue = this.value * this.unit.getBaseConversionFactor();
+        double otherBaseValue = quantity.value * quantity.unit.getBaseConversionFactor();
+
+        // Math.abs handles the precision issues inherent in double multiplication
+        return Math.abs(thisBaseValue - otherBaseValue) <= EPSILON;
     }
 
     @Override
