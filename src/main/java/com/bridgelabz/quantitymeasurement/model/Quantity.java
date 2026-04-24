@@ -4,7 +4,7 @@ import java.util.Objects;
 
 /**
  * Represents a physical quantity with a numeric value and a unit of measurement.
- * Designed as an Immutable Value Object.
+ * Implements the Factory Pattern and Method Overloading for arithmetic.
  */
 public class Quantity {
     private final double value;
@@ -13,42 +13,56 @@ public class Quantity {
     private static final double EPSILON = 0.001;
 
     /**
-     * Constructs a new Quantity.
-     * * @param value the numeric magnitude (cannot be negative).
-     * @param unit the unit of measurement.
-     * @throws IllegalArgumentException if the value is negative.
+     * PRIVATE Constructor to enforce the Factory Pattern.
      */
-    public Quantity(double value, Unit unit) {
+    private Quantity(double value, Unit unit) {
         if (value < 0.0) {
             throw new IllegalArgumentException("Quantity value cannot be negative");
+        }
+        if (unit == null) {
+            throw new IllegalArgumentException("Unit cannot be null");
         }
         this.value = value;
         this.unit = unit;
     }
 
     /**
-     * Adds another Quantity to this instance without mutating the original objects.
-     * * @param other the other Quantity to add.
-     * @return a new, immutable Quantity representing the sum in the base unit (INCH).
-     * @throws IllegalArgumentException if the provided quantity is null.
+     * Factory Method to create a new Quantity.
+     * @param value the numeric magnitude.
+     * @param unit the unit of measurement.
+     * @return a new Quantity instance.
+     */
+    public static Quantity of(double value, Unit unit) {
+        return new Quantity(value, unit);
+    }
+
+    /**
+     * Adds another Quantity to this instance.
+     * @param other the other Quantity to add.
+     * @return a new Quantity representing the sum in INCH.
      */
     public Quantity add(Quantity other) {
         if (other == null) {
             throw new IllegalArgumentException("Cannot add a null quantity");
         }
 
-        // Delegating the math logic directly to the Enum
         double sumInBaseUnit = this.unit.convertToBaseUnit(this.value) +
                 other.unit.convertToBaseUnit(other.value);
 
-        return new Quantity(sumInBaseUnit, Unit.INCH);
+        return Quantity.of(sumInBaseUnit, Unit.INCH);
     }
 
     /**
-     * Compares two quantities based on their normalized base unit values.
-     * * @param obj the object to compare against.
-     * @return true if both quantities represent the exact same physical length.
+     * Overloaded Add Method: Allows adding a raw value and unit directly.
+     * @param value the numeric value to add.
+     * @param unit the unit of the value to add.
+     * @return a new Quantity representing the sum in INCH.
      */
+    public Quantity add(double value, Unit unit) {
+        // Reuses the main add method to strictly enforce the DRY principle
+        return this.add(Quantity.of(value, unit));
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
@@ -59,12 +73,6 @@ public class Quantity {
                 quantity.unit.convertToBaseUnit(quantity.value));
     }
 
-    /**
-     * Private helper method to handle floating-point precision comparisons.
-     * * @param val1 first double value.
-     * @param val2 second double value.
-     * @return true if values are equal within the defined EPSILON margin of error.
-     */
     private boolean areValuesEqual(double val1, double val2) {
         return Math.abs(val1 - val2) <= EPSILON;
     }
