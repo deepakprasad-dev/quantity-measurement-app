@@ -11,6 +11,19 @@ public class Quantity {
         this.unit = unit;
     }
 
+    public Quantity add(Quantity other) {
+        if (other == null) {
+            throw new IllegalArgumentException("Cannot add a null quantity");
+        }
+
+        // Convert both values to the base unit (Inches) and add them
+        double sumInBaseUnit = (this.value * this.unit.getBaseConversionFactor()) +
+                (other.value * other.unit.getBaseConversionFactor());
+
+        // Return a new immutable Quantity object representing the sum in Inches
+        return new Quantity(sumInBaseUnit, Unit.INCH);
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
