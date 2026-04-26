@@ -1,0 +1,27 @@
+package com.bridgelabz.quantitymeasurement.controller;
+
+import com.bridgelabz.quantitymeasurement.dto.QuantityRequestDTO;
+import com.bridgelabz.quantitymeasurement.dto.QuantityResponseDTO;
+import com.bridgelabz.quantitymeasurement.service.QuantityMeasurementService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/quantity")
+@CrossOrigin(origins = "*") // Crucial: Allows your React frontend to talk to this API!
+public class QuantityMeasurementController {
+
+    @Autowired
+    private QuantityMeasurementService service;
+
+    @PostMapping("/convert")
+    public ResponseEntity<QuantityResponseDTO> convert(
+            @RequestBody QuantityRequestDTO request,
+            @RequestParam String targetUnit) {
+
+        // Changed from convertLength to convertQuantity
+        QuantityResponseDTO response = service.convertQuantity(request, targetUnit);
+        return ResponseEntity.ok(response);
+    }
+}
