@@ -1,9 +1,6 @@
 package com.bridgelabz.quantitymeasurement;
 
-import com.bridgelabz.quantitymeasurement.model.LengthUnit;
-import com.bridgelabz.quantitymeasurement.model.Quantity;
-import com.bridgelabz.quantitymeasurement.model.VolumeUnit;
-import com.bridgelabz.quantitymeasurement.model.WeightUnit;
+import com.bridgelabz.quantitymeasurement.model.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -136,8 +133,6 @@ public class QuantityTest {
 
 
 	// UC 12: SUBTRACTION & DIVISION
-
-
 	@Test
 	public void givenTwoInchesAndOneInch_WhenSubtracted_ShouldReturnOneInch() {
 		Quantity<LengthUnit> twoInches = Quantity.of(2.0, LengthUnit.INCH);
@@ -156,6 +151,26 @@ public class QuantityTest {
 
 		Quantity<LengthUnit> actual = meter.subtract(cm, LengthUnit.METER);
 		Assertions.assertEquals(expected, actual);
+	}
+
+
+	// UC 14: TEMPERATURE EQUALITY
+
+
+	@Test
+	public void given212FahrenheitAnd100Celsius_WhenCompared_ShouldReturnEqual() {
+		Quantity<TemperatureUnit> fahrenheit = Quantity.of(212.0, TemperatureUnit.FAHRENHEIT);
+		Quantity<TemperatureUnit> celsius = Quantity.of(100.0, TemperatureUnit.CELSIUS);
+
+		Assertions.assertEquals(fahrenheit, celsius);
+	}
+
+	@Test
+	public void given32FahrenheitAnd0Celsius_WhenCompared_ShouldReturnEqual() {
+		Quantity<TemperatureUnit> fahrenheit = Quantity.of(32.0, TemperatureUnit.FAHRENHEIT);
+		Quantity<TemperatureUnit> celsius = Quantity.of(0.0, TemperatureUnit.CELSIUS);
+
+		Assertions.assertEquals(fahrenheit, celsius);
 	}
 
 	@Test
