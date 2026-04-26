@@ -4,7 +4,7 @@ package com.bridgelabz.quantitymeasurement.model;
  * Enum representing different units of measurement and their base conversion factors.
  * All units are normalized to a base unit (e.g., INCH for Length) to facilitate arithmetic.
  */
-public enum Unit {
+public enum Unit implements IUnit{
     FEET(12.0),
     INCH(1.0),
     YARD(36.0),
