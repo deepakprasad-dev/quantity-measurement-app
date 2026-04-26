@@ -118,10 +118,6 @@ public class QuantityTest {
 		Assertions.assertEquals(expected, actual);
 	}
 
-	// ==========================================
-	// NEGATIVE / EDGE CASES
-	// ==========================================
-
 	@Test
 	public void givenNegativeValue_WhenCreated_ShouldThrowException() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
