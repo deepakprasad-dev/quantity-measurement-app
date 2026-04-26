@@ -1,6 +1,7 @@
 package com.bridgelabz.quantitymeasurement.model;
 
 import java.util.Objects;
+import java.util.function.DoubleBinaryOperator;
 
 /**
  * Represents a physical quantity with a numeric value and a unit of measurement.
@@ -37,12 +38,6 @@ public class Quantity<T extends IUnit> {
         return new Quantity(value, unit);
     }
 
-    /**
-     * Adds another Quantity to this instance.
-     * @param other the other Quantity to add.
-     * @return a new Quantity representing the sum in INCH.
-     */
-
 
     /**
      * UC7: Adds another Quantity and returns the result in the specified Target Unit.
@@ -56,10 +51,7 @@ public class Quantity<T extends IUnit> {
             throw new IllegalArgumentException("Target unit cannot be null");
         }
 
-        double sumInBaseUnit = calculateSumInBaseUnit(other);
-        double targetValue = targetUnit.convertFromBaseUnit(sumInBaseUnit);
-
-        return Quantity.of(targetValue, targetUnit);
+       return performOperation(other,targetUnit, Double::sum);
     }
 
     /**
@@ -82,14 +74,7 @@ public class Quantity<T extends IUnit> {
             throw new IllegalArgumentException("Cannot perform operation with a null quantity");
         }
 
-        double val1InBase = this.unit.convertToBaseUnit(this.value);
-        double val2InBase = other.unit.convertToBaseUnit(other.value);
-
-        // The core math
-        double resultInBase = val1InBase - val2InBase;
-
-        double targetValue = targetUnit.convertFromBaseUnit(resultInBase);
-        return Quantity.of(targetValue, targetUnit);
+        return performOperation(other,targetUnit,(a,b)-> a-b);
     }
 
     // --- UC 12: DIVISION ---
@@ -106,6 +91,27 @@ public class Quantity<T extends IUnit> {
         // The core math
         double targetValue = targetUnit.convertFromBaseUnit(valInBase / divisor);
 
+        return Quantity.of(targetValue, targetUnit);
+    }
+
+    // --- UC 13: CENTRALIZED ARITHMETIC LOGIC ---
+    private Quantity<T> performOperation(Quantity<T> other, T targetUnit, DoubleBinaryOperator operation) {
+        if (targetUnit == null) {
+            throw new IllegalArgumentException("Target unit cannot be null");
+        }
+        if (other == null) {
+            throw new IllegalArgumentException("Cannot perform operation with a null quantity");
+        }
+
+        // 1. Convert both to base units
+        double val1InBase = this.unit.convertToBaseUnit(this.value);
+        double val2InBase = other.unit.convertToBaseUnit(other.value);
+
+        // 2. The Magic: Apply whichever math operator was passed in!
+        double resultInBase = operation.applyAsDouble(val1InBase, val2InBase);
+
+        // 3. Convert back to target unit
+        double targetValue = targetUnit.convertFromBaseUnit(resultInBase);
         return Quantity.of(targetValue, targetUnit);
     }
 
@@ -134,5 +140,9 @@ public class Quantity<T extends IUnit> {
     public int hashCode() {
         // Include the unit's class in the hash to separate 1 Inch from 1 Gram
         return Objects.hash(Math.round(unit.convertToBaseUnit(value) * 1000.0) / 1000.0, unit.getClass());
+    }
+    @Override
+    public String toString() {
+        return "Quantity{value=" + value + ", unit=" + unit + "}";
     }
 }
