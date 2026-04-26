@@ -3,7 +3,7 @@ package com.bridgelabz.quantitymeasurement.model;
 /**
  * Enum representing weight units and their base conversion factors (Base: GRAM).
  */
-public enum WeightUnit {
+public enum WeightUnit implements IUnit{
     GRAM(1.0),
     KILOGRAM(1000.0),
     TONNE(1000000.0);

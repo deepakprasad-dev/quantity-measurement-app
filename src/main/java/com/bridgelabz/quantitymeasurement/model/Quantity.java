@@ -6,16 +6,16 @@ import java.util.Objects;
  * Represents a physical quantity with a numeric value and a unit of measurement.
  * Implements the Factory Pattern and Method Overloading for arithmetic.
  */
-public class Quantity {
+public class Quantity<T extends IUnit> {
     private final double value;
-    private final Unit unit;
+    private final T unit;
 
     private static final double EPSILON = 0.001;
 
     /**
      * PRIVATE Constructor to enforce the Factory Pattern.
      */
-    private Quantity(double value, Unit unit) {
+    private Quantity(double value, T unit) {
         if (value < 0.0) {
             throw new IllegalArgumentException("Quantity value cannot be negative");
         }
@@ -33,7 +33,7 @@ public class Quantity {
      * @param unit  the unit of measurement.
      * @return a new Quantity instance.
      */
-    public static Quantity of(double value, Unit unit) {
+    public static <T extends  IUnit>Quantity of(double value, T unit) {
         return new Quantity(value, unit);
     }
 
@@ -45,41 +45,21 @@ public class Quantity {
 
 
     /**
-     * Overloaded Add Method: Allows adding a raw value and unit directly.
-     *
-     * @param value the numeric value to add.
-     * @param unit  the unit of the value to add.
-     * @return a new Quantity representing the sum in INCH.
-     */
-    public Quantity add(double value, Unit unit) {
-        // Reuses the main add method to strictly enforce the DRY principle
-        return this.add(Quantity.of(value, unit));
-    }
-
-    /**
      * UC7: Adds another Quantity and returns the result in the specified Target Unit.
      *
      * @param other      the other Quantity to add.
      * @param targetUnit the unit the resulting Quantity should be in.
      * @return a new Quantity representing the sum in the target unit.
      */
-    public Quantity add(Quantity other, Unit targetUnit) {
+    public Quantity<T> add(Quantity<T> other, T targetUnit) {
         if (targetUnit == null) {
             throw new IllegalArgumentException("Target unit cannot be null");
         }
 
         double sumInBaseUnit = calculateSumInBaseUnit(other);
-
         double targetValue = targetUnit.convertFromBaseUnit(sumInBaseUnit);
 
         return Quantity.of(targetValue, targetUnit);
-    }
-
-    /**
-     * Backwards compatible add method: Defaults to INCH if no target unit is specified.
-     */
-    public Quantity add(Quantity other) {
-        return this.add(other, Unit.INCH);
     }
 
     /**
@@ -97,10 +77,17 @@ public class Quantity {
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
-        Quantity quantity = (Quantity) obj;
+
+        // Use wildcard <?> because we are checking equality against a potentially unknown object
+        Quantity<?> quantity = (Quantity<?>) obj;
+
+        // CRITICAL: Prevent cross-category equality (e.g., 1 Inch == 1 Gram)
+        if (!this.unit.getClass().equals(quantity.unit.getClass())) {
+            return false;
+        }
 
         return areValuesEqual(this.unit.convertToBaseUnit(this.value),
-                quantity.unit.convertToBaseUnit(quantity.value));
+                ((IUnit) quantity.unit).convertToBaseUnit(quantity.value));
     }
 
     private boolean areValuesEqual(double val1, double val2) {
@@ -109,6 +96,7 @@ public class Quantity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(Math.round(unit.convertToBaseUnit(value) * 1000.0) / 1000.0);
+        // Include the unit's class in the hash to separate 1 Inch from 1 Gram
+        return Objects.hash(Math.round(unit.convertToBaseUnit(value) * 1000.0) / 1000.0, unit.getClass());
     }
 }
