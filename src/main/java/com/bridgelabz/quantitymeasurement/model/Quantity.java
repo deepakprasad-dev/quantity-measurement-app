@@ -1,5 +1,7 @@
 package com.bridgelabz.quantitymeasurement.model;
 
+import lombok.Getter;
+
 import java.util.Objects;
 import java.util.function.DoubleBinaryOperator;
 
@@ -8,6 +10,7 @@ import java.util.function.DoubleBinaryOperator;
  * Implements the Factory Pattern and Method Overloading for arithmetic.
  */
 public class Quantity<T extends IUnit> {
+    @Getter
     private final double value;
     private final T unit;
 
@@ -145,4 +148,5 @@ public class Quantity<T extends IUnit> {
     public String toString() {
         return "Quantity{value=" + value + ", unit=" + unit + "}";
     }
+
 }
