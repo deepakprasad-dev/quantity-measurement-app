@@ -2,6 +2,7 @@ package com.bridgelabz.quantitymeasurement.service;
 
 import com.bridgelabz.quantitymeasurement.dto.QuantityRequestDTO;
 import com.bridgelabz.quantitymeasurement.dto.QuantityResponseDTO;
+import com.bridgelabz.quantitymeasurement.exception.QuantityMeasurementException;
 import com.bridgelabz.quantitymeasurement.model.LengthUnit;
 import com.bridgelabz.quantitymeasurement.model.Quantity;
 import org.springframework.stereotype.Service;
@@ -11,7 +12,8 @@ public class QuantityMeasurementService {
 
     public QuantityResponseDTO convertLength(QuantityRequestDTO request, String targetUnitStr) {
 
-        
+        try {
+
         LengthUnit inputUnit = LengthUnit.valueOf(request.getUnit().toUpperCase());
         LengthUnit targetUnit = LengthUnit.valueOf(targetUnitStr.toUpperCase());
 
@@ -28,5 +30,10 @@ public class QuantityMeasurementService {
                 targetUnit.name(),
                 "Conversion Successful!"
         );
+
+        }catch (IllegalArgumentException e){
+            throw new QuantityMeasurementException("Failed to convert: " + e.getMessage());
+        }
+
     }
 }
