@@ -73,6 +73,42 @@ public class Quantity<T extends IUnit> {
                 other.unit.convertToBaseUnit(other.value);
     }
 
+    // --- UC 12: SUBTRACTION ---
+    public Quantity<T> subtract(Quantity<T> other, T targetUnit) {
+        if (targetUnit == null) {
+            throw new IllegalArgumentException("Target unit cannot be null");
+        }
+        if (other == null) {
+            throw new IllegalArgumentException("Cannot perform operation with a null quantity");
+        }
+
+        double val1InBase = this.unit.convertToBaseUnit(this.value);
+        double val2InBase = other.unit.convertToBaseUnit(other.value);
+
+        // The core math
+        double resultInBase = val1InBase - val2InBase;
+
+        double targetValue = targetUnit.convertFromBaseUnit(resultInBase);
+        return Quantity.of(targetValue, targetUnit);
+    }
+
+    // --- UC 12: DIVISION ---
+    public Quantity<T> divide(double divisor, T targetUnit) {
+        if (targetUnit == null) {
+            throw new IllegalArgumentException("Target unit cannot be null");
+        }
+        if (divisor == 0.0) {
+            throw new ArithmeticException("Cannot divide by zero");
+        }
+
+        double valInBase = this.unit.convertToBaseUnit(this.value);
+
+        // The core math
+        double targetValue = targetUnit.convertFromBaseUnit(valInBase / divisor);
+
+        return Quantity.of(targetValue, targetUnit);
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
