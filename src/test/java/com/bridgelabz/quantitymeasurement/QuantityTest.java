@@ -131,4 +131,50 @@ public class QuantityTest {
 			Quantity.of(1.0, null);
 		});
 	}
+
+
+
+
+	// UC 12: SUBTRACTION & DIVISION
+
+
+	@Test
+	public void givenTwoInchesAndOneInch_WhenSubtracted_ShouldReturnOneInch() {
+		Quantity<LengthUnit> twoInches = Quantity.of(2.0, LengthUnit.INCH);
+		Quantity<LengthUnit> oneInch = Quantity.of(1.0, LengthUnit.INCH);
+		Quantity<LengthUnit> expected = Quantity.of(1.0, LengthUnit.INCH);
+
+		Quantity<LengthUnit> actual = twoInches.subtract(oneInch, LengthUnit.INCH);
+		Assertions.assertEquals(expected, actual);
+	}
+
+	@Test
+	public void givenOneMeterAndFiftyCentimeters_WhenSubtracted_ShouldReturnHalfMeter() {
+		Quantity<LengthUnit> meter = Quantity.of(1.0, LengthUnit.METER);
+		Quantity<LengthUnit> cm = Quantity.of(50.0, LengthUnit.CENTIMETER);
+		Quantity<LengthUnit> expected = Quantity.of(0.5, LengthUnit.METER);
+
+		Quantity<LengthUnit> actual = meter.subtract(cm, LengthUnit.METER);
+		Assertions.assertEquals(expected, actual);
+	}
+
+	@Test
+	public void givenTwoInches_WhenDividedByTwo_ShouldReturnOneInch() {
+		Quantity<LengthUnit> twoInches = Quantity.of(2.0, LengthUnit.INCH);
+		Quantity<LengthUnit> expected = Quantity.of(1.0, LengthUnit.INCH);
+
+		// Division is scalar (dividing by a normal number, not another quantity)
+		Quantity<LengthUnit> actual = twoInches.divide(2.0, LengthUnit.INCH);
+		Assertions.assertEquals(expected, actual);
+	}
+
+	@Test
+	public void givenQuantity_WhenDividedByZero_ShouldThrowException() {
+		Quantity<LengthUnit> twoInches = Quantity.of(2.0, LengthUnit.INCH);
+
+		Assertions.assertThrows(ArithmeticException.class, () -> {
+			twoInches.divide(0.0, LengthUnit.INCH);
+		});
+	}
+
 }
