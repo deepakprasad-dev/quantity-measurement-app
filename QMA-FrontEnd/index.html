@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Quantity Measurement</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="app-header">
+        <h1>Quantity Measurement</h1>
+        <button id="logoutBtn" class="hidden">Log Out</button>
+    </header>
+
+    <main class="container">
+        
+        <section id="authSection" class="auth-card">
+            <h2>Welcome</h2>
+            <p>Please log in to access the enterprise converter.</p>
+            <a href="http://localhost:8080/oauth2/authorization/google" class="btn-google">Sign in with Google</a>
+        </section>
+
+        <section id="converterSection" class="converter-card hidden">
+            <form id="conversionForm" class="grid-form">
+                
+                <div class="form-group full-width">
+                    <label for="operationType">Operation</label>
+                    <select id="operationType">
+                        <option value="CONVERT">Convert</option>
+                        <option value="COMPARE">Compare</option>
+                        <option value="ADD">Add</option>
+                    </select>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="quantityType">Measurement Type</label>
+                    <select id="quantityType" required>
+                        <option value="LENGTH">Length</option>
+                        <option value="VOLUME">Volume</option>
+                        <option value="WEIGHT">Weight</option>
+                        <option value="TEMPERATURE">Temperature</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="inputValue1">First Value</label>
+                    <input type="number" id="inputValue1" step="0.01" required placeholder="e.g., 12">
+                </div>
+                <div class="form-group">
+                    <label for="inputUnit1">First Unit</label>
+                    <select id="inputUnit1" required></select>
+                </div>
+
+                <div class="form-group hidden" id="groupValue2">
+                    <label for="inputValue2">Second Value</label>
+                    <input type="number" id="inputValue2" step="0.01" placeholder="e.g., 1">
+                </div>
+                <div class="form-group hidden" id="groupUnit2">
+                    <label for="inputUnit2">Second Unit</label>
+                    <select id="inputUnit2"></select>
+                </div>
+
+                <div class="form-group full-width" id="groupTargetUnit">
+                    <label for="targetUnit">Result Unit</label>
+                    <select id="targetUnit"></select>
+                </div>
+
+                <button type="submit" id="submitBtn" class="btn-primary full-width">Convert</button>
+            </form>
+
+            <div id="resultDisplay" class="result-box hidden">
+                <h3>Result: <span id="finalResult"></span></h3>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
