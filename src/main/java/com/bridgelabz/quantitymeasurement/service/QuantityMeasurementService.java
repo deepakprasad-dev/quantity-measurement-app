@@ -74,9 +74,9 @@ public class QuantityMeasurementService {
         return targetUnit.convertFromBaseUnit(baseValue);
     }
 
-    // ==========================================
+
     // UC 17 Expansion: COMPARISON API
-    // ==========================================
+
     public boolean compareQuantities(OperationRequestDTO request) {
         String type = request.getQuantityType().toUpperCase();
 
@@ -101,9 +101,8 @@ public class QuantityMeasurementService {
         return q1.equals(q2); // This magically handles the base-unit math behind the scenes!
     }
 
-    // ==========================================
+
     // UC 17 Expansion: ARITHMETIC API
-    // ==========================================
     public QuantityResponseDTO addQuantities(OperationRequestDTO request) {
         String type = request.getQuantityType().toUpperCase();
         String targetStr = request.getTargetUnit() != null ? request.getTargetUnit().toUpperCase() : request.getFirstUnit().toUpperCase();
