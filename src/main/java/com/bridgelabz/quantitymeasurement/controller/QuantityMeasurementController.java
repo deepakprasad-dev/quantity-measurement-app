@@ -26,13 +26,13 @@ public class QuantityMeasurementController {
         QuantityResponseDTO response = service.convertQuantity( request, targetUnit);
         return ResponseEntity.ok(response);
     }
-
+    // compare quantities
     @PostMapping("/compare")
     public ResponseEntity<Boolean> compare(@Valid @RequestBody OperationRequestDTO request) {
         boolean areEqual = service.compareQuantities(request);
         return ResponseEntity.ok(areEqual);
     }
-
+    // add quantities
     @PostMapping("/add")
     public ResponseEntity<QuantityResponseDTO> add(@Valid @RequestBody OperationRequestDTO request) {
         QuantityResponseDTO response = service.addQuantities(request);
