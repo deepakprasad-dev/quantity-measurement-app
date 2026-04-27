@@ -4,6 +4,7 @@ import com.bridgelabz.quantitymeasurement.dto.OperationRequestDTO;
 import com.bridgelabz.quantitymeasurement.dto.QuantityRequestDTO;
 import com.bridgelabz.quantitymeasurement.dto.QuantityResponseDTO;
 import com.bridgelabz.quantitymeasurement.service.QuantityMeasurementService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,22 +19,22 @@ public class QuantityMeasurementController {
 
     @PostMapping("/convert")
     public ResponseEntity<QuantityResponseDTO> convert(
-            @RequestBody QuantityRequestDTO request,
+            @Valid @RequestBody QuantityRequestDTO request,
             @RequestParam String targetUnit) {
 
         // Changed from convertLength to convertQuantity
-        QuantityResponseDTO response = service.convertQuantity(request, targetUnit);
+        QuantityResponseDTO response = service.convertQuantity( request, targetUnit);
         return ResponseEntity.ok(response);
     }
-
+    // compare quantities
     @PostMapping("/compare")
-    public ResponseEntity<Boolean> compare( @RequestBody OperationRequestDTO request) {
+    public ResponseEntity<Boolean> compare(@Valid @RequestBody OperationRequestDTO request) {
         boolean areEqual = service.compareQuantities(request);
         return ResponseEntity.ok(areEqual);
     }
-
+    // add quantities
     @PostMapping("/add")
-    public ResponseEntity<QuantityResponseDTO> add(@RequestBody OperationRequestDTO request) {
+    public ResponseEntity<QuantityResponseDTO> add(@Valid @RequestBody OperationRequestDTO request) {
         QuantityResponseDTO response = service.addQuantities(request);
         return ResponseEntity.ok(response);
     }
