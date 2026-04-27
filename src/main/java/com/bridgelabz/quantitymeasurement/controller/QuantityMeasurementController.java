@@ -1,5 +1,6 @@
 package com.bridgelabz.quantitymeasurement.controller;
 
+import com.bridgelabz.quantitymeasurement.dto.OperationRequestDTO;
 import com.bridgelabz.quantitymeasurement.dto.QuantityRequestDTO;
 import com.bridgelabz.quantitymeasurement.dto.QuantityResponseDTO;
 import com.bridgelabz.quantitymeasurement.service.QuantityMeasurementService;
@@ -24,4 +25,17 @@ public class QuantityMeasurementController {
         QuantityResponseDTO response = service.convertQuantity(request, targetUnit);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/compare")
+    public ResponseEntity<Boolean> compare( @RequestBody OperationRequestDTO request) {
+        boolean areEqual = service.compareQuantities(request);
+        return ResponseEntity.ok(areEqual);
+    }
+
+    @PostMapping("/add")
+    public ResponseEntity<QuantityResponseDTO> add(@RequestBody OperationRequestDTO request) {
+        QuantityResponseDTO response = service.addQuantities(request);
+        return ResponseEntity.ok(response);
+    }
+
 }
