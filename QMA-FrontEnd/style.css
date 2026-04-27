@@ -1,0 +1,113 @@
+/* --- Global & Variables --- */
+:root {
+    --primary-color: #4A90E2;
+    --background-color: #F4F7F6;
+    --card-bg: #FFFFFF;
+    --text-color: #333333;
+    --border-radius: 8px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* --- Flexbox Header --- */
+.app-header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* --- Container & Cards --- */
+.container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+}
+
+.auth-card, .converter-card {
+    background: var(--card-bg);
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+}
+
+/* --- Grid Form Layout --- */
+.grid-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Two equal columns */
+    gap: 1.5rem;
+    text-align: left;
+}
+
+.full-width {
+    grid-column: 1 / -1; /* Spans across all columns */
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+input, select, button {
+    padding: 0.75rem;
+    margin-top: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+/* --- Buttons & Pseudo Classes --- */
+.btn-primary, .btn-google {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-primary:hover, .btn-google:hover {
+    background-color: #357ABD; /* Pseudo-class for interaction */
+}
+
+/* --- Utility Classes --- */
+.hidden {
+    display: none !important;
+}
+
+.result-box {
+    margin-top: 2rem;
+    padding: 1rem;
+    background-color: #e8f4fd;
+    border-radius: var(--border-radius);
+    color: var(--primary-color);
+}
+
+/* --- Media Queries (Responsive UI) --- */
+@media (max-width: 600px) {
+    .grid-form {
+        grid-template-columns: 1fr; /* Stack columns on mobile */
+    }
+}
