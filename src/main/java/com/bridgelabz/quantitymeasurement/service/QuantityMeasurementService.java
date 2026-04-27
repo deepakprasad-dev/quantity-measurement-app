@@ -4,11 +4,14 @@ import com.bridgelabz.quantitymeasurement.dto.OperationRequestDTO;
 import com.bridgelabz.quantitymeasurement.dto.QuantityRequestDTO;
 import com.bridgelabz.quantitymeasurement.dto.QuantityResponseDTO;
 import com.bridgelabz.quantitymeasurement.entity.QuantityRecord;
+import com.bridgelabz.quantitymeasurement.entity.User;
 import com.bridgelabz.quantitymeasurement.exception.QuantityMeasurementException;
 import com.bridgelabz.quantitymeasurement.model.*;
 import com.bridgelabz.quantitymeasurement.repository.QuantityRecordRepository;
+import com.bridgelabz.quantitymeasurement.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,6 +20,9 @@ public class QuantityMeasurementService {
 
     @Autowired
     private QuantityRecordRepository repository;
+
+    @Autowired
+    private UserRepository userRepository;
 
 
     public QuantityResponseDTO convertQuantity(QuantityRequestDTO request, String targetUnitStr) {
@@ -47,8 +53,15 @@ public class QuantityMeasurementService {
                     throw new QuantityMeasurementException("Invalid Quantity Type. Use LENGTH, VOLUME, WEIGHT, or TEMPERATURE.");
             }
 
+
+            String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+
+            User loggedInUser = userRepository.findByEmail(currentUserEmail)
+                    .orElseThrow(() -> new QuantityMeasurementException("Unauthorized: No valid user found in database."));
+
             // 2. Save to Database
             QuantityRecord record = new QuantityRecord();
+            record.setUser(loggedInUser);
             record.setQuantityType(type);
             record.setInputValue(request.getValue());
             record.setInputUnit(inputUnitStr);
