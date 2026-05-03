@@ -41,7 +41,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
         // Generate Token and Redirect to React
         String token = jwtUtils.generateJwtToken(email);
-        String frontendRedirectUrl = "http://localhost:5000/?token=" + token;
+        String frontendRedirectUrl = "http://127.0.0.1:5000/index.html?token=" + token;
         getRedirectStrategy().sendRedirect(request, response, frontendRedirectUrl);
     }
 }

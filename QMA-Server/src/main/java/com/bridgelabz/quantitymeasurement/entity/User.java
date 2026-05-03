@@ -15,6 +15,7 @@ public class User {
     private String email;
     private String name;
     private String googleId;
+    private String password;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<QuantityRecord> conversionHistory;

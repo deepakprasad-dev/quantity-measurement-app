@@ -30,7 +30,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
             String email = jwtUtils.getEmailFromJwtToken(jwt);
 
-            // Tells Spring Security "This user is valid and logged in"
+            // mark this user as authenticated so spring security allows the request
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                     email, null, new ArrayList<>());
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
@@ -44,7 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private String parseJwt(HttpServletRequest request) {
         String headerAuth = request.getHeader("Authorization");
         if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
-            return headerAuth.substring(7); // Removes "Bearer " prefix
+            return headerAuth.substring(7); // strip the "Bearer " part to get just the token
         }
         return null;
     }

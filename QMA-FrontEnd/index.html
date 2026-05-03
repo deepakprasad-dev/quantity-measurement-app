@@ -3,79 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enterprise Quantity Measurement</title>
+    <title>Quantity Measurement</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="bg-light">
 
-    <header class="app-header">
-        <h1>Quantity Measurement</h1>
-        <button id="logoutBtn" class="hidden">Log Out</button>
-    </header>
-
-    <main class="container">
-        
-        <section id="authSection" class="auth-card">
-            <h2>Welcome</h2>
-            <p>Please log in to access the enterprise converter.</p>
-            <a href="http://localhost:8080/oauth2/authorization/google" class="btn-google">Sign in with Google</a>
-        </section>
-
-        <section id="converterSection" class="converter-card hidden">
-            <form id="conversionForm" class="grid-form">
-                
-                <div class="form-group full-width">
-                    <label for="operationType">Operation</label>
-                    <select id="operationType">
-                        <option value="CONVERT">Convert</option>
-                        <option value="COMPARE">Compare</option>
-                        <option value="ADD">Add</option>
-                    </select>
-                </div>
-
-                <div class="form-group full-width">
-                    <label for="quantityType">Measurement Type</label>
-                    <select id="quantityType" required>
-                        <option value="LENGTH">Length</option>
-                        <option value="VOLUME">Volume</option>
-                        <option value="WEIGHT">Weight</option>
-                        <option value="TEMPERATURE">Temperature</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="inputValue1">First Value</label>
-                    <input type="number" id="inputValue1" step="0.01" required placeholder="e.g., 12">
-                </div>
-                <div class="form-group">
-                    <label for="inputUnit1">First Unit</label>
-                    <select id="inputUnit1" required></select>
-                </div>
-
-                <div class="form-group hidden" id="groupValue2">
-                    <label for="inputValue2">Second Value</label>
-                    <input type="number" id="inputValue2" step="0.01" placeholder="e.g., 1">
-                </div>
-                <div class="form-group hidden" id="groupUnit2">
-                    <label for="inputUnit2">Second Unit</label>
-                    <select id="inputUnit2"></select>
-                </div>
-
-                <div class="form-group full-width" id="groupTargetUnit">
-                    <label for="targetUnit">Result Unit</label>
-                    <select id="targetUnit"></select>
-                </div>
-
-                <button type="submit" id="submitBtn" class="btn-primary full-width">Convert</button>
-            </form>
-
-            <div id="resultDisplay" class="result-box hidden">
-                <h3>Result: <span id="finalResult"></span></h3>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="#">Quantity Measurement</a>
+            <div class="d-flex">
+                <button id="logoutBtn" class="btn btn-outline-light d-none">Log Out</button>
             </div>
-        </section>
+        </div>
+    </nav>
 
-    </main>
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer"></div>
 
+    <div class="container">
+        <div class="row justify-content-center">
+            
+            <!-- Auth Section -->
+            <div class="col-md-6 col-lg-5" id="authSection">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <ul class="nav nav-tabs card-header-tabs" id="authTabs" role="tablist">
+                            <li class="nav-item">
+                                <button class="nav-link active" id="tabLogin" type="button">Login</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link" id="tabRegister" type="button">Register</button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        
+                        <!-- Login Form -->
+                        <form id="loginForm">
+                            <h5 class="card-title text-center mb-4">Sign In</h5>
+                            <div class="mb-3">
+                                <label for="loginEmail" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="loginEmail" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="loginPassword" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="loginPassword" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 mb-3">Login</button>
+                            
+                            <div class="text-center text-muted mb-3">OR</div>
+                            
+                            <a href="http://127.0.0.1:8080/oauth2/authorization/google" class="btn btn-outline-danger w-100">
+                                Sign in with Google
+                            </a>
+                        </form>
+
+                        <!-- Register Form -->
+                        <form id="registerForm" class="d-none">
+                            <h5 class="card-title text-center mb-4">Create Account</h5>
+                            <div class="mb-3">
+                                <label for="registerName" class="form-label">Full Name</label>
+                                <input type="text" class="form-control" id="registerName" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="registerEmail" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="registerEmail" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="registerPassword" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="registerPassword" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Sign Up</button>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Converter Section -->
+            <div class="col-md-8 col-lg-6 d-none" id="converterSection">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h4 class="card-title mb-4">Converter Dashboard</h4>
+                        <form id="conversionForm">
+                            
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <label for="operationType" class="form-label">Operation</label>
+                                    <select id="operationType" class="form-select">
+                                        <option value="CONVERT">Convert</option>
+                                        <option value="COMPARE">Compare</option>
+                                        <option value="ADD">Add</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <label class="form-label">Measurement Type</label>
+                                    <div class="btn-group w-100" role="group">
+                                        <input type="radio" class="btn-check" name="quantityType" id="typeLength" value="LENGTH" checked>
+                                        <label class="btn btn-outline-primary" for="typeLength">Length</label>
+
+                                        <input type="radio" class="btn-check" name="quantityType" id="typeVolume" value="VOLUME">
+                                        <label class="btn btn-outline-primary" for="typeVolume">Volume</label>
+
+                                        <input type="radio" class="btn-check" name="quantityType" id="typeWeight" value="WEIGHT">
+                                        <label class="btn btn-outline-primary" for="typeWeight">Weight</label>
+
+                                        <input type="radio" class="btn-check" name="quantityType" id="typeTemp" value="TEMPERATURE">
+                                        <label class="btn btn-outline-primary" for="typeTemp">Temp</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-sm-6 mb-3 mb-sm-0">
+                                    <label for="inputValue1" class="form-label">First Value</label>
+                                    <input type="number" class="form-control" id="inputValue1" step="0.01" required>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label for="inputUnit1" class="form-label">First Unit</label>
+                                    <select id="inputUnit1" class="form-select" required></select>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3 d-none" id="groupValue2">
+                                <div class="col-sm-6 mb-3 mb-sm-0">
+                                    <label for="inputValue2" class="form-label">Second Value</label>
+                                    <input type="number" class="form-control" id="inputValue2" step="0.01">
+                                </div>
+                                <div class="col-sm-6" id="groupUnit2">
+                                    <label for="inputUnit2" class="form-label">Second Unit</label>
+                                    <select id="inputUnit2" class="form-select"></select>
+                                </div>
+                            </div>
+
+                            <div class="row mb-4" id="groupTargetUnit">
+                                <div class="col-12">
+                                    <label for="targetUnit" class="form-label">Result Unit</label>
+                                    <select id="targetUnit" class="form-select"></select>
+                                </div>
+                            </div>
+
+                            <button type="submit" id="submitBtn" class="btn btn-success w-100">
+                                <span class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true" id="spinner"></span>
+                                <span id="btnText">Convert</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Result Box -->
+                <div id="resultDisplay" class="alert alert-success mt-4 d-none text-center" role="alert">
+                    <h5 class="alert-heading">Result</h5>
+                    <p class="mb-0 fs-3 fw-bold" id="finalResult">--</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

@@ -192,4 +192,87 @@ public class QuantityTest {
 		});
 	}
 
+	// ==========================================
+	// ADDED TEST CASES FOR EDGE CASES & COVERAGE
+	// ==========================================
+
+	@Test
+	public void givenOneInchAndTwoPointFiveFourCentimeters_WhenCompared_ShouldReturnEqual() {
+		Quantity<LengthUnit> inch = Quantity.of(1.0, LengthUnit.INCH);
+		Quantity<LengthUnit> cm = Quantity.of(2.54, LengthUnit.CENTIMETER);
+		Assertions.assertEquals(inch, cm);
+	}
+
+	@Test
+	public void givenOneLitreAndOneThousandMilliLitres_WhenSubtracted_ShouldReturnZeroLitres() {
+		Quantity<VolumeUnit> litre = Quantity.of(1.0, VolumeUnit.LITRE);
+		Quantity<VolumeUnit> ml = Quantity.of(1000.0, VolumeUnit.MILLILITRE);
+		Quantity<VolumeUnit> expected = Quantity.of(0.0, VolumeUnit.LITRE);
+
+		Quantity<VolumeUnit> actual = litre.subtract(ml, VolumeUnit.LITRE);
+		Assertions.assertEquals(expected, actual);
+	}
+
+	@Test
+	public void givenNullTargetUnit_WhenAdded_ShouldThrowException() {
+		Quantity<LengthUnit> inch = Quantity.of(1.0, LengthUnit.INCH);
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			inch.add(inch, null);
+		});
+	}
+
+	@Test
+	public void givenNullOtherQuantity_WhenAdded_ShouldThrowException() {
+		Quantity<LengthUnit> inch = Quantity.of(1.0, LengthUnit.INCH);
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			inch.add(null, LengthUnit.INCH);
+		});
+	}
+
+	@Test
+	public void givenNullTargetUnit_WhenSubtracted_ShouldThrowException() {
+		Quantity<LengthUnit> inch = Quantity.of(1.0, LengthUnit.INCH);
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			inch.subtract(inch, null);
+		});
+	}
+
+	@Test
+	public void givenNullOtherQuantity_WhenSubtracted_ShouldThrowException() {
+		Quantity<LengthUnit> inch = Quantity.of(1.0, LengthUnit.INCH);
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			inch.subtract(null, LengthUnit.INCH);
+		});
+	}
+
+	@Test
+	public void givenNullTargetUnit_WhenDivided_ShouldThrowException() {
+		Quantity<LengthUnit> inch = Quantity.of(1.0, LengthUnit.INCH);
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			inch.divide(2.0, null);
+		});
+	}
+
+	@Test
+	public void givenEqualQuantities_WhenHashCodeCalled_ShouldReturnSameHashCode() {
+		Quantity<LengthUnit> inch1 = Quantity.of(1.0, LengthUnit.INCH);
+		Quantity<LengthUnit> inch2 = Quantity.of(1.0, LengthUnit.INCH);
+		Assertions.assertEquals(inch1.hashCode(), inch2.hashCode());
+	}
+
+	@Test
+	public void givenDifferentCategoryQuantities_WhenHashCodeCalled_ShouldReturnDifferentHashCode() {
+		Quantity<LengthUnit> inch = Quantity.of(1.0, LengthUnit.INCH);
+		Quantity<WeightUnit> gram = Quantity.of(1.0, WeightUnit.GRAM);
+		Assertions.assertNotEquals(inch.hashCode(), gram.hashCode());
+	}
+
+	@Test
+	public void givenQuantity_WhenToStringCalled_ShouldReturnCorrectFormat() {
+		Quantity<LengthUnit> inch = Quantity.of(1.0, LengthUnit.INCH);
+		String result = inch.toString();
+		Assertions.assertTrue(result.contains("value=1.0"));
+		Assertions.assertTrue(result.contains("unit=INCH"));
+	}
+
 }

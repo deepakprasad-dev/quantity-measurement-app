@@ -26,8 +26,8 @@ public class QuantityMeasurementService {
 
 
     public QuantityResponseDTO convertQuantity(QuantityRequestDTO request, String targetUnitStr) {
-    log.info("Processing conversion request: Type={}, Value={}, From={}, To={}",
-            request.getQuantityType(), request.getValue(), request.getUnit(), targetUnitStr);
+        log.info("converting: type={}, value={}, from={}, to={}",
+                request.getQuantityType(), request.getValue(), request.getUnit(), targetUnitStr);
         try {
             String type = request.getQuantityType().toUpperCase();
             String inputUnitStr = request.getUnit().toUpperCase();
@@ -35,7 +35,7 @@ public class QuantityMeasurementService {
 
             double resultValue = 0.0;
 
-            // 1. Route to the correct Enum based on the Type
+            // figure out which category the user sent and do the conversion
             switch (type) {
                 case "LENGTH":
                     resultValue = calculateConversion(request.getValue(), LengthUnit.valueOf(inputUnitStr), LengthUnit.valueOf(targetUnitStr));
@@ -53,13 +53,13 @@ public class QuantityMeasurementService {
                     throw new QuantityMeasurementException("Invalid Quantity Type. Use LENGTH, VOLUME, WEIGHT, or TEMPERATURE.");
             }
 
-
+            // get the currently logged-in user from the security context
             String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
 
             User loggedInUser = userRepository.findByEmail(currentUserEmail)
                     .orElseThrow(() -> new QuantityMeasurementException("Unauthorized: No valid user found in database."));
 
-            // 2. Save to Database
+            // save the conversion to the database so we have a history
             QuantityRecord record = new QuantityRecord();
             record.setUser(loggedInUser);
             record.setQuantityType(type);
@@ -69,26 +69,22 @@ public class QuantityMeasurementService {
             record.setResultValue(resultValue);
             repository.save(record);
 
-            log.info("Successfully converted to {} {}. Saved to database.", resultValue, targetUnitStr);
+            log.info("done. result={} {}", resultValue, targetUnitStr);
 
-            // 3. Return the generic response
             return new QuantityResponseDTO(resultValue, targetUnitStr, "Conversion Successful & Saved to DB!");
 
         } catch (IllegalArgumentException e) {
-            log.error("Conversion failed due to invalid unit spellings: {}", e.getMessage());
+            log.error("conversion failed, bad unit spelling: {}", e.getMessage());
             throw new QuantityMeasurementException("Failed to convert: Invalid unit spelling for the given category.");
         }
     }
 
-    // --- THE GENERIC HELPER METHOD ---
+    // converts a value from one unit to another using the base unit as a middleman
     private <T extends IUnit> double calculateConversion(double value, T inputUnit, T targetUnit) {
-        // Convert input to base unit, then convert base unit to target unit
         double baseValue = inputUnit.convertToBaseUnit(value);
         return targetUnit.convertFromBaseUnit(baseValue);
     }
 
-
-    // UC 17 Expansion: COMPARISON API
 
     public boolean compareQuantities(OperationRequestDTO request) {
         String type = request.getQuantityType().toUpperCase();
@@ -107,17 +103,17 @@ public class QuantityMeasurementService {
         }
     }
 
-    // Generic Helper for Comparison (Uses the custom equals() method you wrote in UC 12!)
+    // uses our custom equals() on the Quantity model to do the comparison
     private <T extends IUnit> boolean compareGeneric(OperationRequestDTO req, T unit1, T unit2) {
         Quantity<T> q1 = Quantity.of(req.getFirstValue(), unit1);
         Quantity<T> q2 = Quantity.of(req.getSecondValue(), unit2);
-        return q1.equals(q2); // This magically handles the base-unit math behind the scenes!
+        return q1.equals(q2);
     }
 
 
-    // UC 17 Expansion: ARITHMETIC API
     public QuantityResponseDTO addQuantities(OperationRequestDTO request) {
         String type = request.getQuantityType().toUpperCase();
+        // default to first unit if target not provided
         String targetStr = request.getTargetUnit() != null ? request.getTargetUnit().toUpperCase() : request.getFirstUnit().toUpperCase();
 
         double resultValue = 0.0;
@@ -133,13 +129,13 @@ public class QuantityMeasurementService {
                 resultValue = addGeneric(request, WeightUnit.valueOf(request.getFirstUnit().toUpperCase()), WeightUnit.valueOf(request.getSecondUnit().toUpperCase()), WeightUnit.valueOf(targetStr));
                 break;
             default:
-                throw new QuantityMeasurementException("Cannot add Temperature or Invalid Type."); // Temperature addition isn't standard!
+                throw new QuantityMeasurementException("Cannot add Temperature or Invalid Type.");
         }
 
         return new QuantityResponseDTO(resultValue, targetStr, "Addition Successful!");
     }
 
-    // Generic Helper for Addition
+    // helper to add two quantities and return just the result value
     private <T extends IUnit> double addGeneric(OperationRequestDTO req, T unit1, T unit2, T targetUnit) {
         Quantity<T> q1 = Quantity.of(req.getFirstValue(), unit1);
         Quantity<T> q2 = Quantity.of(req.getSecondValue(), unit2);

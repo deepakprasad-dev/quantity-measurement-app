@@ -21,9 +21,8 @@ public class QuantityMeasurementController {
     public ResponseEntity<QuantityResponseDTO> convert(
             @Valid @RequestBody QuantityRequestDTO request,
             @RequestParam String targetUnit) {
-
-        // Changed from convertLength to convertQuantity
-        QuantityResponseDTO response = service.convertQuantity( request, targetUnit);
+        // errors are handled globally in GlobalExceptionHandler, no try-catch needed here
+        QuantityResponseDTO response = service.convertQuantity(request, targetUnit);
         return ResponseEntity.ok(response);
     }
     // compare quantities

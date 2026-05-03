@@ -5,20 +5,16 @@ import lombok.Getter;
 import java.util.Objects;
 import java.util.function.DoubleBinaryOperator;
 
-/**
- * Represents a physical quantity with a numeric value and a unit of measurement.
- * Implements the Factory Pattern and Method Overloading for arithmetic.
- */
+// this class holds a value and a unit together, like "12 inches" or "100 celsius"
 public class Quantity<T extends IUnit> {
     @Getter
     private final double value;
     private final T unit;
 
+    // we use a small tolerance to handle floating point comparison (e.g. 0.00001 difference is fine)
     private static final double EPSILON = 0.001;
 
-    /**
-     * PRIVATE Constructor to enforce the Factory Pattern.
-     */
+    // private so no one can create a Quantity directly, use Quantity.of() instead
     private Quantity(double value, T unit) {
         if (value < 0.0) {
             throw new IllegalArgumentException("Quantity value cannot be negative");
@@ -30,36 +26,20 @@ public class Quantity<T extends IUnit> {
         this.unit = unit;
     }
 
-    /**
-     * Factory Method to create a new Quantity.
-     *
-     * @param value the numeric magnitude.
-     * @param unit  the unit of measurement.
-     * @return a new Quantity instance.
-     */
+    // use this to create a new quantity, e.g. Quantity.of(12.0, LengthUnit.INCH)
     public static <T extends  IUnit>Quantity of(double value, T unit) {
         return new Quantity(value, unit);
     }
 
-
-    /**
-     * UC7: Adds another Quantity and returns the result in the specified Target Unit.
-     *
-     * @param other      the other Quantity to add.
-     * @param targetUnit the unit the resulting Quantity should be in.
-     * @return a new Quantity representing the sum in the target unit.
-     */
+    // adds this quantity to another and returns the result in the target unit
     public Quantity<T> add(Quantity<T> other, T targetUnit) {
         if (targetUnit == null) {
             throw new IllegalArgumentException("Target unit cannot be null");
         }
-
-       return performOperation(other,targetUnit, Double::sum);
+       return performOperation(other, targetUnit, Double::sum);
     }
 
-    /**
-     * Private utility method to enforce DRY principle for arithmetic.
-     */
+    // helper to add two base unit values (not used externally)
     private double calculateSumInBaseUnit(Quantity other) {
         if (other == null) {
             throw new IllegalArgumentException("Cannot add a null quantity");
@@ -68,7 +48,7 @@ public class Quantity<T extends IUnit> {
                 other.unit.convertToBaseUnit(other.value);
     }
 
-    // --- UC 12: SUBTRACTION ---
+    // subtracts another quantity from this one
     public Quantity<T> subtract(Quantity<T> other, T targetUnit) {
         if (targetUnit == null) {
             throw new IllegalArgumentException("Target unit cannot be null");
@@ -76,11 +56,10 @@ public class Quantity<T extends IUnit> {
         if (other == null) {
             throw new IllegalArgumentException("Cannot perform operation with a null quantity");
         }
-
-        return performOperation(other,targetUnit,(a,b)-> a-b);
+        return performOperation(other, targetUnit, (a, b) -> a - b);
     }
 
-    // --- UC 12: DIVISION ---
+    // divides this quantity by a plain number (not another quantity)
     public Quantity<T> divide(double divisor, T targetUnit) {
         if (targetUnit == null) {
             throw new IllegalArgumentException("Target unit cannot be null");
@@ -90,14 +69,11 @@ public class Quantity<T extends IUnit> {
         }
 
         double valInBase = this.unit.convertToBaseUnit(this.value);
-
-        // The core math
         double targetValue = targetUnit.convertFromBaseUnit(valInBase / divisor);
-
         return Quantity.of(targetValue, targetUnit);
     }
 
-    // --- UC 13: CENTRALIZED ARITHMETIC LOGIC ---
+    // shared method used by add and subtract - converts both to base unit, does math, converts back
     private Quantity<T> performOperation(Quantity<T> other, T targetUnit, DoubleBinaryOperator operation) {
         if (targetUnit == null) {
             throw new IllegalArgumentException("Target unit cannot be null");
@@ -106,14 +82,14 @@ public class Quantity<T extends IUnit> {
             throw new IllegalArgumentException("Cannot perform operation with a null quantity");
         }
 
-        // 1. Convert both to base units
+        // step 1: convert both values to the base unit (e.g. inches for length)
         double val1InBase = this.unit.convertToBaseUnit(this.value);
         double val2InBase = other.unit.convertToBaseUnit(other.value);
 
-        // 2. The Magic: Apply whichever math operator was passed in!
+        // step 2: apply the math (add, subtract, etc.)
         double resultInBase = operation.applyAsDouble(val1InBase, val2InBase);
 
-        // 3. Convert back to target unit
+        // step 3: convert the result back to the unit the user asked for
         double targetValue = targetUnit.convertFromBaseUnit(resultInBase);
         return Quantity.of(targetValue, targetUnit);
     }
@@ -123,10 +99,9 @@ public class Quantity<T extends IUnit> {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
 
-        // Use wildcard <?> because we are checking equality against a potentially unknown object
         Quantity<?> quantity = (Quantity<?>) obj;
 
-        // CRITICAL: Prevent cross-category equality (e.g., 1 Inch == 1 Gram)
+        // make sure we don't compare apples to oranges (e.g. 1 inch vs 1 gram)
         if (!this.unit.getClass().equals(quantity.unit.getClass())) {
             return false;
         }
@@ -141,9 +116,10 @@ public class Quantity<T extends IUnit> {
 
     @Override
     public int hashCode() {
-        // Include the unit's class in the hash to separate 1 Inch from 1 Gram
+        // include the unit type in the hash so 1 inch and 1 gram don't collide in maps
         return Objects.hash(Math.round(unit.convertToBaseUnit(value) * 1000.0) / 1000.0, unit.getClass());
     }
+
     @Override
     public String toString() {
         return "Quantity{value=" + value + ", unit=" + unit + "}";
