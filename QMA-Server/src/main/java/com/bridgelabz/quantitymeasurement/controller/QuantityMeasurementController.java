@@ -38,4 +38,18 @@ public class QuantityMeasurementController {
         return ResponseEntity.ok(response);
     }
 
+    // subtract quantities
+    @PostMapping("/subtract")
+    public ResponseEntity<QuantityResponseDTO> subtract(@Valid @RequestBody OperationRequestDTO request) {
+        QuantityResponseDTO response = service.subtractQuantities(request);
+        return ResponseEntity.ok(response);
+    }
+
+    // divide quantity by a number
+    @PostMapping("/divide")
+    public ResponseEntity<QuantityResponseDTO> divide(@Valid @RequestBody OperationRequestDTO request) {
+        QuantityResponseDTO response = service.divideQuantity(request);
+        return ResponseEntity.ok(response);
+    }
+
 }
