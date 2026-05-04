@@ -24,7 +24,23 @@ public class QuantityMeasurementService {
     @Autowired
     private UserRepository userRepository;
 
+    // ==========================================
+    // UNIT RESOLUTION — single place to map type + string → IUnit enum
+    // ==========================================
+    private IUnit resolveUnit(String type, String unitStr) {
+        switch (type) {
+            case "LENGTH":      return LengthUnit.valueOf(unitStr);
+            case "VOLUME":      return VolumeUnit.valueOf(unitStr);
+            case "WEIGHT":      return WeightUnit.valueOf(unitStr);
+            case "TEMPERATURE": return TemperatureUnit.valueOf(unitStr);
+            default:
+                throw new QuantityMeasurementException("Invalid Quantity Type. Use LENGTH, VOLUME, WEIGHT, or TEMPERATURE.");
+        }
+    }
 
+    // ==========================================
+    // CONVERT
+    // ==========================================
     public QuantityResponseDTO convertQuantity(QuantityRequestDTO request, String targetUnitStr) {
         log.info("converting: type={}, value={}, from={}, to={}",
                 request.getQuantityType(), request.getValue(), request.getUnit(), targetUnitStr);
@@ -33,25 +49,11 @@ public class QuantityMeasurementService {
             String inputUnitStr = request.getUnit().toUpperCase();
             targetUnitStr = targetUnitStr.toUpperCase();
 
-            double resultValue = 0.0;
+            IUnit inputUnit = resolveUnit(type, inputUnitStr);
+            IUnit targetUnit = resolveUnit(type, targetUnitStr);
 
-            // figure out which category the user sent and do the conversion
-            switch (type) {
-                case "LENGTH":
-                    resultValue = calculateConversion(request.getValue(), LengthUnit.valueOf(inputUnitStr), LengthUnit.valueOf(targetUnitStr));
-                    break;
-                case "VOLUME":
-                    resultValue = calculateConversion(request.getValue(), VolumeUnit.valueOf(inputUnitStr), VolumeUnit.valueOf(targetUnitStr));
-                    break;
-                case "WEIGHT":
-                    resultValue = calculateConversion(request.getValue(), WeightUnit.valueOf(inputUnitStr), WeightUnit.valueOf(targetUnitStr));
-                    break;
-                case "TEMPERATURE":
-                    resultValue = calculateConversion(request.getValue(), TemperatureUnit.valueOf(inputUnitStr), TemperatureUnit.valueOf(targetUnitStr));
-                    break;
-                default:
-                    throw new QuantityMeasurementException("Invalid Quantity Type. Use LENGTH, VOLUME, WEIGHT, or TEMPERATURE.");
-            }
+            double baseValue = inputUnit.convertToBaseUnit(request.getValue());
+            double resultValue = targetUnit.convertFromBaseUnit(baseValue);
 
             // get the currently logged-in user from the security context
             String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -79,67 +81,69 @@ public class QuantityMeasurementService {
         }
     }
 
-    // converts a value from one unit to another using the base unit as a middleman
-    private <T extends IUnit> double calculateConversion(double value, T inputUnit, T targetUnit) {
-        double baseValue = inputUnit.convertToBaseUnit(value);
-        return targetUnit.convertFromBaseUnit(baseValue);
-    }
-
-
+    // ==========================================
+    // COMPARE
+    // ==========================================
     public boolean compareQuantities(OperationRequestDTO request) {
         String type = request.getQuantityType().toUpperCase();
+        IUnit unit1 = resolveUnit(type, request.getFirstUnit().toUpperCase());
+        IUnit unit2 = resolveUnit(type, request.getSecondUnit().toUpperCase());
 
-        switch (type) {
-            case "LENGTH":
-                return compareGeneric(request, LengthUnit.valueOf(request.getFirstUnit().toUpperCase()), LengthUnit.valueOf(request.getSecondUnit().toUpperCase()));
-            case "VOLUME":
-                return compareGeneric(request, VolumeUnit.valueOf(request.getFirstUnit().toUpperCase()), VolumeUnit.valueOf(request.getSecondUnit().toUpperCase()));
-            case "WEIGHT":
-                return compareGeneric(request, WeightUnit.valueOf(request.getFirstUnit().toUpperCase()), WeightUnit.valueOf(request.getSecondUnit().toUpperCase()));
-            case "TEMPERATURE":
-                return compareGeneric(request, TemperatureUnit.valueOf(request.getFirstUnit().toUpperCase()), TemperatureUnit.valueOf(request.getSecondUnit().toUpperCase()));
-            default:
-                throw new QuantityMeasurementException("Invalid Quantity Type.");
-        }
-    }
-
-    // uses our custom equals() on the Quantity model to do the comparison
-    private <T extends IUnit> boolean compareGeneric(OperationRequestDTO req, T unit1, T unit2) {
-        Quantity<T> q1 = Quantity.of(req.getFirstValue(), unit1);
-        Quantity<T> q2 = Quantity.of(req.getSecondValue(), unit2);
+        Quantity<IUnit> q1 = Quantity.of(request.getFirstValue(), unit1);
+        Quantity<IUnit> q2 = Quantity.of(request.getSecondValue(), unit2);
         return q1.equals(q2);
     }
 
-
+    // ==========================================
+    // ADD
+    // ==========================================
     public QuantityResponseDTO addQuantities(OperationRequestDTO request) {
-        String type = request.getQuantityType().toUpperCase();
-        // default to first unit if target not provided
-        String targetStr = request.getTargetUnit() != null ? request.getTargetUnit().toUpperCase() : request.getFirstUnit().toUpperCase();
-
-        double resultValue = 0.0;
-
-        switch (type) {
-            case "LENGTH":
-                resultValue = addGeneric(request, LengthUnit.valueOf(request.getFirstUnit().toUpperCase()), LengthUnit.valueOf(request.getSecondUnit().toUpperCase()), LengthUnit.valueOf(targetStr));
-                break;
-            case "VOLUME":
-                resultValue = addGeneric(request, VolumeUnit.valueOf(request.getFirstUnit().toUpperCase()), VolumeUnit.valueOf(request.getSecondUnit().toUpperCase()), VolumeUnit.valueOf(targetStr));
-                break;
-            case "WEIGHT":
-                resultValue = addGeneric(request, WeightUnit.valueOf(request.getFirstUnit().toUpperCase()), WeightUnit.valueOf(request.getSecondUnit().toUpperCase()), WeightUnit.valueOf(targetStr));
-                break;
-            default:
-                throw new QuantityMeasurementException("Cannot add Temperature or Invalid Type.");
-        }
-
-        return new QuantityResponseDTO(resultValue, targetStr, "Addition Successful!");
+        return performTwoQuantityOperation(request, "Addition", Quantity::add);
     }
 
-    // helper to add two quantities and return just the result value
-    private <T extends IUnit> double addGeneric(OperationRequestDTO req, T unit1, T unit2, T targetUnit) {
-        Quantity<T> q1 = Quantity.of(req.getFirstValue(), unit1);
-        Quantity<T> q2 = Quantity.of(req.getSecondValue(), unit2);
-        Quantity<T> result = q1.add(q2, targetUnit);
-        return result.getValue();
+    // ==========================================
+    // SUBTRACT
+    // ==========================================
+    public QuantityResponseDTO subtractQuantities(OperationRequestDTO request) {
+        return performTwoQuantityOperation(request, "Subtraction", Quantity::subtract);
+    }
+
+    // ==========================================
+    // DIVIDE
+    // ==========================================
+    public QuantityResponseDTO divideQuantity(OperationRequestDTO request) {
+        String type = request.getQuantityType().toUpperCase();
+        String targetStr = request.getTargetUnit() != null ? request.getTargetUnit().toUpperCase() : request.getFirstUnit().toUpperCase();
+
+        IUnit inputUnit = resolveUnit(type, request.getFirstUnit().toUpperCase());
+        IUnit targetUnit = resolveUnit(type, targetStr);
+
+        Quantity<IUnit> q = Quantity.of(request.getFirstValue(), inputUnit);
+        Quantity<IUnit> result = q.divide(request.getSecondValue(), targetUnit);
+
+        return new QuantityResponseDTO(result.getValue(), targetStr, "Division Successful!");
+    }
+
+    // ==========================================
+    // SHARED HELPER — eliminates duplication between add & subtract
+    // ==========================================
+    @FunctionalInterface
+    private interface TwoQuantityOp {
+        Quantity<IUnit> apply(Quantity<IUnit> q1, Quantity<IUnit> q2, IUnit targetUnit);
+    }
+
+    private QuantityResponseDTO performTwoQuantityOperation(OperationRequestDTO request, String opName, TwoQuantityOp operation) {
+        String type = request.getQuantityType().toUpperCase();
+        String targetStr = request.getTargetUnit() != null ? request.getTargetUnit().toUpperCase() : request.getFirstUnit().toUpperCase();
+
+        IUnit unit1 = resolveUnit(type, request.getFirstUnit().toUpperCase());
+        IUnit unit2 = resolveUnit(type, request.getSecondUnit().toUpperCase());
+        IUnit targetUnit = resolveUnit(type, targetStr);
+
+        Quantity<IUnit> q1 = Quantity.of(request.getFirstValue(), unit1);
+        Quantity<IUnit> q2 = Quantity.of(request.getSecondValue(), unit2);
+        Quantity<IUnit> result = operation.apply(q1, q2, targetUnit);
+
+        return new QuantityResponseDTO(result.getValue(), targetStr, opName + " Successful!");
     }
 }
