@@ -5,6 +5,7 @@ import com.bridgelabz.quantitymeasurement.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -21,6 +22,9 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
     @Autowired
     private JwtUtils jwtUtils;
+
+    @Value("${app.frontend.redirect-url}")
+    private String frontendRedirectUrl;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
@@ -41,7 +45,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
         // Generate Token and Redirect to React
         String token = jwtUtils.generateJwtToken(email);
-        String frontendRedirectUrl = "http://localhost:5000/index.html?token=" + token;
-        getRedirectStrategy().sendRedirect(request, response, frontendRedirectUrl);
+        String url = frontendRedirectUrl +"?token=" + token;
+        getRedirectStrategy().sendRedirect(request, response, url);
     }
 }
