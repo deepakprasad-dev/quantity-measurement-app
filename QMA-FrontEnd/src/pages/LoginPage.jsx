@@ -6,6 +6,7 @@ import { useAuth } from "../context/AuthContext";
 
 
 const GOOGLE_AUTH_URL = import.meta.env.VITE_GOOGLE_AUTH_URL;
+console.log("Google Auth URL:", GOOGLE_AUTH_URL);
 
 export default function LoginPage() {
   const [activeTab, setActiveTab] = useState("login");
