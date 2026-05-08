@@ -4,7 +4,8 @@ import toast from "react-hot-toast";
 import { login, register } from "../api/api";
 import { useAuth } from "../context/AuthContext";
 
-const GOOGLE_AUTH_URL = "http://localhost:8080/oauth2/authorization/google";
+
+const GOOGLE_AUTH_URL = import.meta.env.VITE_GOOGLE_AUTH_URL;
 
 export default function LoginPage() {
   const [activeTab, setActiveTab] = useState("login");

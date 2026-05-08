@@ -1,13 +1,16 @@
-// =========================================
-// Centralized API client for QMA backend
-// =========================================
 
-const API_BASE_URL = "http://localhost:8080/api";
 
-/**
- * Generic request helper that attaches the JWT token
- * and handles common error responses.
- */
+const apiUrl = import.meta.env.VITE_API_URL;
+
+// const API_BASE_URL = "http://localhost:8080/api";
+const API_BASE_URL = `${apiUrl}/api`;
+
+// console.log("API Base URL:", process.env.BASE_URL);
+
+
+
+
+
 export async function apiRequest(path, { method = "POST", body, params, auth = true } = {}) {
   let url = `${API_BASE_URL}${path}`;
 
@@ -51,7 +54,7 @@ export async function apiRequest(path, { method = "POST", body, params, auth = t
   return response.text();
 }
 
-// ---------- Auth endpoints ----------
+
 
 export function login(email, password) {
   return apiRequest("/auth/login", { body: { email, password }, auth: false });
@@ -61,7 +64,6 @@ export function register(name, email, password) {
   return apiRequest("/auth/register", { body: { name, email, password }, auth: false });
 }
 
-// ---------- Quantity endpoints ----------
 
 export function convert(quantityType, value, unit, targetUnit) {
   return apiRequest("/quantity/convert", {

@@ -6,6 +6,7 @@ import com.bridgelabz.authservice.repository.UserRepository;
 import com.bridgelabz.authservice.security.JwtUtils;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
@@ -48,18 +49,30 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest req) {
+        try {
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        req.getEmail(),
-                        req.getPassword()
-                )
-        );
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            req.getEmail(),
+                            req.getPassword()
+                    )
+            );
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String token = jwtUtils.generateJwtToken(req.getEmail());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String token = jwtUtils.generateJwtToken(req.getEmail());
 
-        return ResponseEntity.ok(new AuthResponse(token));
+            return ResponseEntity.ok(new AuthResponse(token));
+
+        } catch (BadCredentialsException e) {
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Error: Invalid email or password");
+
+        } catch (Exception e) {
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error: An unexpected error occurred during login");
+        }
     }
 }

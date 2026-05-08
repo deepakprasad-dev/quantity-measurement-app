@@ -49,16 +49,20 @@ services:
 #      - qma-network
 
   quantity-service:
-      build: ./quantity-service
-      container_name: quantity-service
-      ports:
-        - "8082:8082"
-      depends_on:
-        - eureka-server
-      environment:
-        EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
-      networks:
-        - qma-network
+    build: ./quantity-service
+    container_name: quantity-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - eureka-server
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://https://quantity-measurement-app-44gd.onrender.com:8761/eureka/
+      # Add these three lines:
+      SPRING_DATASOURCE_URL: jdbc:mysql://YOUR_AIVEN_HOST:YOUR_AIVEN_PORT/defaultdb?sslMode=REQUIRED
+      SPRING_DATASOURCE_USERNAME: avnadmin
+      SPRING_DATASOURCE_PASSWORD: YOUR_AIVEN_PASSWORD
+    networks:
+      - qma-network
 
 #  api-gateway:
 #        build: ./api-gateway
