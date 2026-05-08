@@ -3,6 +3,7 @@ package com.bridgelabz.authservice.security;
 import com.bridgelabz.authservice.entity.User;
 import com.bridgelabz.authservice.repository.UserRepository;
 import jakarta.servlet.http.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -13,6 +14,8 @@ import java.io.IOException;
 @Component
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
+    @Value("${app.frontend.redirect-url}")
+    private String frontendRedirectUrl;
     private final JwtUtils jwtUtils;
     private final UserRepository userRepository;
 
@@ -45,6 +48,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         String token = jwtUtils.generateJwtToken(email);
 
         // 🔥 Redirect to frontend (BEST PRACTICE)
-        response.sendRedirect("http://localhost:5173/oauth?token=" + token);
+        response.sendRedirect(frontendRedirectUrl + "?token=" + token);
     }
 }

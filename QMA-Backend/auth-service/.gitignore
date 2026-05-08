@@ -126,10 +126,6 @@ logs/
 # FRAMEWORK-SPECIFIC PATTERNS
 # ••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••
 
-**/application-*.properties
-**/application-*.yml
-**/application.properties
-**/application.yml
 *.cer
 *.class
 *.csr
