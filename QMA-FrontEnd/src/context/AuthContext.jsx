@@ -2,10 +2,25 @@ import { createContext, useContext, useState, useEffect, useCallback } from "rea
 
 const AuthContext = createContext(null);
 
+function parseJwt(token) {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    return null;
+  }
+}
+
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => localStorage.getItem("jwt_token"));
 
   const isAuthenticated = !!token;
+  const decodedPayload = token ? parseJwt(token) : null;
+  const userEmail = decodedPayload ? decodedPayload.sub : null;
 
   const loginWithToken = useCallback((jwt) => {
     localStorage.setItem("jwt_token", jwt);
@@ -30,7 +45,7 @@ export function AuthProvider({ children }) {
   }, [token]);
 
   return (
-    <AuthContext.Provider value={{ token, isAuthenticated, loginWithToken, logout }}>
+    <AuthContext.Provider value={{ token, isAuthenticated, userEmail, loginWithToken, logout }}>
       {children}
     </AuthContext.Provider>
   );
