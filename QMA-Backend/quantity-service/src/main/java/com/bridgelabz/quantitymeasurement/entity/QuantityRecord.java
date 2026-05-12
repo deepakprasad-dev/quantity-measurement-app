@@ -10,13 +10,10 @@ public class QuantityRecord {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String quantityType;
     private double inputValue;
     private String inputUnit;
     private String targetUnit;
     private double resultValue;
-
-    // --- NEW: Store email instead of User entity ---
     private String userEmail;
 }

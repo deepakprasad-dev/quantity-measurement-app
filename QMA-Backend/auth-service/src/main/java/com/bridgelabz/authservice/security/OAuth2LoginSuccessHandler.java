@@ -34,7 +34,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         String email = oauthUser.getAttribute("email");
         String name = oauthUser.getAttribute("name");
 
-        // Save user if not exists
+        // save user
         User user = userRepository.findByEmail(email)
                 .orElseGet(() -> {
                     User u = new User();
@@ -44,10 +44,10 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                     return userRepository.save(u);
                 });
 
-        // Generate JWT
+        // generate JWT
         String token = jwtUtils.generateJwtToken(email);
 
-        // 🔥 Redirect to frontend (BEST PRACTICE)
+        // redirect to frontend
         response.sendRedirect(frontendRedirectUrl + "?token=" + token);
     }
 }

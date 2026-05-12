@@ -19,7 +19,7 @@ public class User {
     private String googleId;
     private String password;
 
-    // ✅ Bug 4 Fix: constructor needed by OAuth2LoginSuccessHandler
+
     public User(String email, String name) {
         this.email = email;
         this.name = name;

@@ -13,7 +13,7 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    // custom business exceptions
+
     @ExceptionHandler(QuantityMeasurementException.class)
     public ResponseEntity<Map<String, String>> handleQuantityException(QuantityMeasurementException ex) {
         Map<String, String> response = new HashMap<>();
@@ -40,7 +40,6 @@ public class GlobalExceptionHandler {
         Map<String, String> errors = new HashMap<>();
         errors.put("error", "Validation Failed");
 
-        // Loop through all the broken rules and map the field name to the error message
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
             errors.put(error.getField(), error.getDefaultMessage());
         }

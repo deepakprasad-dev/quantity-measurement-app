@@ -14,26 +14,26 @@ spring:
     gateway:
       discovery:
         locator:
-          enabled: true   # auto routing via Eureka (VERY IMPORTANT)
+          enabled: true
 
       routes:
-        # 🔐 AUTH SERVICE
+        #  AUTH SERVICE
         - id: auth-service
-          uri: lb://AUTH-SERVICE  # Make sure this exactly matches the name in Eureka
+          uri: lb://AUTH-SERVICE
           predicates:
             - Path=/api/auth/**
           filters:
             - StripPrefix=1
 
-        # 🔐 AUTH OAUTH ROUTES
+        # AUTH OAUTH ROUTES
         - id: auth-oauth
           uri: lb://AUTH-SERVICE
           predicates:
             - Path=/oauth2/**,/login/**,/error
 
-        # 📦 QUANTITY SERVICE
+        # QUANTITY SERVICE
         - id: quantity-service
-          uri: lb://QUANTITY-SERVICE # Make sure this exactly matches the name in Eureka
+          uri: lb://QUANTITY-SERVICE
           predicates:
             - Path=/api/quantity/**
           filters:
@@ -43,7 +43,6 @@ spring:
         cors-configurations:
           '[/**]':
             allowedOrigins:
-              # Parameterized: Will use FRONTEND_URL in the cloud, localhost locally
               - "${FRONTEND_URL:http://localhost:5173}"
             allowedMethods:
               - GET

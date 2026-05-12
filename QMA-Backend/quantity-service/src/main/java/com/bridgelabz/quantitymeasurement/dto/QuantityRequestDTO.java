@@ -15,7 +15,6 @@ public class QuantityRequestDTO {
     @NotBlank(message = "Quantity type (LENGTH, VOLUME, etc.) is required.")
     private String quantityType;
 
-    // We use 'Double' instead of 'double' so Spring can check if it is null (missing)
     @NotNull(message = "The numerical value is required.")
     private Double value;
 
